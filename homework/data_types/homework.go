@@ -1,6 +1,6 @@
 package main
 
-func convert(num uint32) uint32 {
+func ToLittleEndian(num uint32) uint32 {
     return ((num>>24)&0xff) | // move byte 3 to byte 0
                     ((num<<8)&0xff0000) | // move byte 1 to byte 2
                     ((num>>8)&0xff00) | // move byte 2 to byte 1

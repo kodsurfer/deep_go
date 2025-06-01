@@ -10,31 +10,53 @@ import (
 // go test -v homework_test.go
 
 type OrderedMap struct {
-	// need to implement
+	keys   []int
+	values map[int]int
 }
 
 func NewOrderedMap() OrderedMap {
-	return OrderedMap{} // need to implement
+	return OrderedMap{
+		keys:   make([]int, 0),
+		values: make(map[int]int),
+	}
 }
 
 func (m *OrderedMap) Insert(key, value int) {
-	// need to implement
+	if !m.Contains(key) {
+		index := 0
+		for index < len(m.keys) && m.keys[index] < key {
+			index++
+		}
+		m.keys = append(m.keys[:index], append([]int{key}, m.keys[index:]...)...)
+	}
+	m.values[key] = value
 }
 
 func (m *OrderedMap) Erase(key int) {
-	// need to implement
+	if m.Contains(key) {
+		for i, k := range m.keys {
+			if k == key {
+				m.keys = append(m.keys[:i], m.keys[i+1:]...)
+				break
+			}
+		}
+		delete(m.values, key)
+	}
 }
 
 func (m *OrderedMap) Contains(key int) bool {
-	return false // need to implement
+	_, exists := m.values[key]
+	return exists
 }
 
 func (m *OrderedMap) Size() int {
-	return 0 // need to implement
+	return len(m.keys)
 }
 
 func (m *OrderedMap) ForEach(action func(int, int)) {
-	// need to implement
+	for _, key := range m.keys {
+		action(key, m.values[key])
+	}
 }
 
 func TestCircularQueue(t *testing.T) {

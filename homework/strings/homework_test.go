@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"sync/atomic"
 	"testing"
 	"unsafe"
 
@@ -10,28 +11,50 @@ import (
 
 type COWBuffer struct {
 	data []byte
-	refs *int
-	// need to implement
+	refs *int32
 }
 
 func NewCOWBuffer(data []byte) COWBuffer {
-	return COWBuffer{} // need to implement
+	refCount := int32(1)
+	return COWBuffer{
+		data: data,
+		refs: &refCount,
+	}
 }
 
 func (b *COWBuffer) Clone() COWBuffer {
-	return COWBuffer{} // need to implement
+	atomic.AddInt32(b.refs, 1)
+	return COWBuffer{
+		data: b.data,
+		refs: b.refs,
+	}
 }
 
 func (b *COWBuffer) Close() {
-	// need to implement
+	if atomic.AddInt32(b.refs, -1) == 0 {
+		b.data = nil
+		b.refs = nil
+	}
 }
 
 func (b *COWBuffer) Update(index int, value byte) bool {
-	return false // need to implement
+	if index < 0 || index >= len(b.data) {
+		return false
+	}
+	if atomic.LoadInt32(b.refs) > 1 {
+		newData := make([]byte, len(b.data))
+		copy(newData, b.data)
+		b.data = newData
+		atomic.AddInt32(b.refs, -1)
+		newRefs := int32(1)
+		b.refs = &newRefs
+	}
+	b.data[index] = value
+	return true
 }
 
 func (b *COWBuffer) String() string {
-	return "" // need to implement
+	return *(*string)(unsafe.Pointer(&b.data))
 }
 
 func TestCOWBuffer(t *testing.T) {

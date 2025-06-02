@@ -95,12 +95,26 @@ const (
 )
 
 type GamePerson struct {
-	// need to implement
+	name       string
+	x          int
+	y          int
+	z          int
+	gold       int
+	mana       int
+	health     int
+	respect    int
+	strength   int
+	experience int
+	level      int
+	flags      byte
 }
 
 func NewGamePerson(options ...Option) GamePerson {
-	// need to implement
-	return GamePerson{}
+	p := GamePerson{}
+	for _, option := range options {
+		option(&p)
+	}
+	return p
 }
 
 func (p *GamePerson) Name() string {
